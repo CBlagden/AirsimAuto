@@ -12,6 +12,9 @@ class CircularStack(list):
             self.stack.pop(0)
         self.stack.append(item)
 
+    def is_full(self):
+        return len(self.stack) == self.size
+
     def __getitem__(self, item):
         return self.stack[item]
 
