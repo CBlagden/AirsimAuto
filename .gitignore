@@ -2,3 +2,4 @@
 .vscode
 .ipynb_checkpoints
 .exrc
+__pycache__/
