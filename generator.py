@@ -1,10 +1,14 @@
 from keras.utils import Sequence
+from keras_preprocessing.image import ImageDataGenerator
 from sklearn.utils import shuffle
 import numpy as np
 import cv2
 
 
 class DriveDataGenerator(Sequence):
+    """
+        TODO: add more image transforms, e.g. cropping image
+    """
 
     def __init__(self,
                  images,
@@ -34,14 +38,11 @@ class DriveDataGenerator(Sequence):
         steering_angles = []
         for i, img in enumerate(batch_x):
             img = img[self.roi[0]:self.roi[1], self.roi[2]:self.roi[3]]
-            img = cv2.resize(img, (128, 128))
+            img = cv2.resize(img, self.resize_dims)
             img = np.expand_dims(img, axis=2)
             steering_angle = batch_y[i]
 
             img, steering_angle = self.random_shear(img, steering_angle, shear_range=100)
-            
-#             img, steering_angle = self.random_crop(img, steering_angle, tx_lower=-20, tx_upper=20, ty_lower=-10,
-#                                                    ty_upper=10)
             img, steering_angle = self.random_flip(img, steering_angle)
             img = self.random_brightness(img)
             imgs.append(img)
@@ -51,32 +52,6 @@ class DriveDataGenerator(Sequence):
             imgs, steering_angles = shuffle(imgs, steering_angles)
 
         return np.array(imgs), np.array(steering_angles)
-
-    def random_crop(self, image, steering=0.0, tx_lower=-20, tx_upper=20, ty_lower=-2, ty_upper=2, rand=True):
-        # we will randomly crop subsections of the image and use them as our data set.
-        # also the input to the network will need to be cropped, but of course not randomly and centered.
-        shape = image.shape
-        col_start, col_end = abs(tx_lower), shape[1] - tx_upper
-        horizon = 15
-        bonnet = 34
-        if rand:
-            tx = np.random.randint(tx_lower, tx_upper + 1)
-            ty = np.random.randint(ty_lower, ty_upper + 1)
-        else:
-            tx, ty = 0, 0
-        
-        
-        random_crop = image[horizon + ty:bonnet + ty, col_start + tx:col_end + tx, :]
-        image = cv2.resize(random_crop, self.resize_dims, cv2.INTER_AREA)
-        
-        # the steering variable needs to be updated to counteract the shift
-        if tx_lower != tx_upper:
-            dsteering = -tx / (tx_upper - tx_lower) / 3.0
-        else:
-            dsteering = 0
-        steering += dsteering
-
-        return image, steering
 
     def random_shear(self, image, steering, shear_range):
         rows, cols, ch = image.shape

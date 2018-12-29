@@ -3,6 +3,8 @@ import airsim
 import cv2
 import numpy as np
 import time
+import keyboard
+
 
 if __name__ == '__main__':
     model = load_model('model.h5')
