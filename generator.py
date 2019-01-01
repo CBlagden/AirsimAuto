@@ -4,7 +4,6 @@ from sklearn.utils import shuffle
 import numpy as np
 import cv2
 
-
 class DriveDataGenerator(Sequence):
     """
         TODO: add more image transforms, e.g. cropping image
