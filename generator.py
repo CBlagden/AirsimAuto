@@ -1,5 +1,4 @@
 from keras.utils import Sequence
-from keras_preprocessing.image import ImageDataGenerator
 from sklearn.utils import shuffle
 import numpy as np
 import cv2
@@ -36,14 +35,15 @@ class DriveDataGenerator(Sequence):
         imgs = []
         steering_angles = []
         for i, img in enumerate(batch_x):
-            img = img[self.roi[0]:self.roi[1], self.roi[2]:self.roi[3]]
-            img = cv2.resize(img, self.resize_dims)
-            img = np.expand_dims(img, axis=2)
             steering_angle = batch_y[i]
+
+            img = img[self.roi[0]:self.roi[1], self.roi[2]:self.roi[3], :]
+            img = cv2.resize(img, self.resize_dims)
 
             img, steering_angle = self.random_shear(img, steering_angle, shear_range=100)
             img, steering_angle = self.random_flip(img, steering_angle)
             img = self.random_brightness(img)
+
             imgs.append(img)
             steering_angles.append(steering_angle)
 
@@ -67,13 +67,10 @@ class DriveDataGenerator(Sequence):
         return image, steering
 
     def random_brightness(self, image):
-        image1 = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
-        image1 = cv2.cvtColor(image1, cv2.COLOR_RGB2HSV)
+        image1 = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
         random_bright = 0.8 + 0.4 * (2 * np.random.uniform() - 1.0)
         image1[:, :, 2] = image1[:, :, 2] * random_bright
         image1 = cv2.cvtColor(image1, cv2.COLOR_HSV2RGB)
-        image1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
-        image1 = np.expand_dims(image1, axis=2)
         return image1
 
     def random_flip(self, image, steering):
