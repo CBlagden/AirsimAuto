@@ -14,7 +14,7 @@ controls_queue = Queue()
 
 
 def on_press(key):
-    if key.char == 'r':
+    if key.char == 'r' or key.char == 'e':
         controls_queue.put(key)
 
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # seconds
     delta_time = 0.05
-    time_length = 30
+    time_length = 120
 
     car_controls = airsim.CarControls()
     car_controls.throttle = 0.0
@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
             steering_angle = float(model.predict(img))
 
-            car_controls.throttle = 0.5
+            car_controls.throttle = 0.8
             car_controls.steering = steering_angle
             client.setCarControls(car_controls)
     
