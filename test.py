@@ -80,8 +80,8 @@ if __name__ == '__main__':
                 steering_angle *= -2.0
             else:
                 has_stopped = False
-                if vel < 10.0:
-                    throttle = 0.8
+                if vel < 8.0:
+                    throttle = 1.0
                 else:
                     throttle = 0.0
                 car_controls.is_manual_gear = False

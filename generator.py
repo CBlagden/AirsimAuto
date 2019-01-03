@@ -28,6 +28,7 @@ class DriveDataGenerator(Sequence):
         self.batch_size = batch_size
         self.roi = roi
         self.shuffle = shuffle
+        self.normalize = normalize
         self.img_generator = ImageDataGenerator()
 
     def __getitem__(self, index):
