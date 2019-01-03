@@ -1,23 +1,25 @@
 from keras.utils import Sequence
+from keras.preprocessing.image import ImageDataGenerator
 from sklearn.utils import shuffle
 import numpy as np
 import cv2
 
+
 class DriveDataGenerator(Sequence):
     """
-        TODO: add more image transforms, e.g. cropping image
+        TODO: 
+            add functionality for previous steering data input
+            add more image transforms, e.g. cropping image
     """
 
     def __init__(self,
                  images,
                  labels,
-                 resize_dims=(128, 128),
+                 resize_dims=(64, 64),
                  batch_size=32,
                  roi=None,
-                 horizontal_flip=True,
-                 flip_percentage=0.5,
-                 zero_drop_percentage=0.7,
-                 shuffle=True):
+                 shuffle=True,
+                 normalize=True):
         if roi is None:
             roi = [76, 135, 0, 255]
         self.images = images
@@ -26,12 +28,16 @@ class DriveDataGenerator(Sequence):
         self.batch_size = batch_size
         self.roi = roi
         self.shuffle = shuffle
+        self.img_generator = ImageDataGenerator()
 
     def __getitem__(self, index):
         batch_x = self.images[index * self.batch_size:
                               (index + 1) * self.batch_size]
         batch_y = self.labels[index * self.batch_size:
                               (index + 1) * self.batch_size]
+        if self.normalize:
+            batch_x = self.img_generator.standardize(batch_x)
+
         imgs = []
         steering_angles = []
         for i, img in enumerate(batch_x):
@@ -40,7 +46,8 @@ class DriveDataGenerator(Sequence):
             img = img[self.roi[0]:self.roi[1], self.roi[2]:self.roi[3], :]
             img = cv2.resize(img, self.resize_dims)
 
-            img, steering_angle = self.random_shear(img, steering_angle, shear_range=100)
+            img, steering_angle = self.random_shear(
+                img, steering_angle, shear_range=100)
             img, steering_angle = self.random_flip(img, steering_angle)
             img = self.random_brightness(img)
 
